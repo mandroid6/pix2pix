@@ -29,4 +29,25 @@ class BaseModel():
     def set_input(self, input):
         self.input = input
         
+    def forward(self):
+        pass
+    
+    def setup(self, opt, parser=None):
+        if self.isTrain:
+            self.schedulers = [networks.get_scheduler(optimizer, opt) for optimizer in self.optimizers]
+            
+        if not self.isTrain or opt.continue_train:
+            self.load_networks(opt.which_epoch)
+        self.print_networks(opt.verbose)
+        
+    def eval(self):
+        for name in self.model_names:
+            if isinstance(name, str):
+                net = getattr(self, 'net' + name)
+                net.eval()
+                
+    def test(self):
+        with torch.no_grad():
+            self.forward()
+            
     
